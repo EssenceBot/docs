@@ -1,0 +1,21 @@
+site_name: Essence Bot Docs
+repo_url: https://gitea.fater.eu.org/EssenceBot/essence-bot-docs
+repo_name: EssenceBot/essence-bot-docs
+theme:
+  name: material
+  palette:
+    scheme: slate
+  icon:
+    repo: fontawesome/brands/git-alt
+plugins:
+  - search
+  - minify:
+      minify_html: true
+      minify_css: true
+      htmlmin_opts:
+          remove_comments: true
+      cache_safe: true
+      css_files:
+        - stylesheets/extra.css
+extra_css:
+  - stylesheets/extra.css
