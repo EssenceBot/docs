@@ -1,0 +1,37 @@
+/* groovylint-disable CompileStatic, NestedBlockDepth */
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                sh 'docker pull nginx:stable-alpine-slim'
+                sh 'DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker build -t essence-bot/docs .'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                script {
+                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                        sh 'docker stop essence-bot-docs && docker rm essence-bot-docs'
+                    }
+                }
+                configFileProvider([configFile(fileId: 'essence-bot-docs', variable: 'DOCKER_CONFIG')]) {
+                    sh '''
+                        source $DOCKER_CONFIG
+                        docker run \
+                        --name=essence-bot-docs \
+                        --restart=always \
+                        --network $DOCKER_NETWORK_NAME \
+                        --hostname $DOCKER_HOSTNAME \
+                        -d essence-bot/docs
+                    '''
+                }
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'curl -sSf https://essence.fater.dev/docs > /dev/null && echo "Success"'
+            }
+        }
+    }
+}
